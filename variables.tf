@@ -1,7 +1,7 @@
 variable aws_region {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "eu-west-2"
 }
 
 variable project_name {
@@ -89,5 +89,15 @@ variable private_subnet_cidr_blocks {
 variable instances_per_subnet {
 description = "Number of EC2 instances in each private subnet"
 type = number
-default = 3
+default = 1
+}
+
+variable "my-scriptfile" {
+    default = "my-script.sh"
+}
+
+variable "use-snapshot" {
+  description = "If true, a pre-configured snapshot that is available in the required region will be used"
+  type        = bool
+  default     = false
 }

@@ -1,38 +1,45 @@
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "2.69.0"
+    aws            = {
+      source       = "hashicorp/aws"
+      version      = "2.69.0"
     }
   }
 }
 
 provider "aws" {
-  region  = var.aws_region
+  region           = var.aws_region
 }
 
+locals {
+  ami-mapping      = {
+    true           = aws_ami.my-ami.id
+    false          = data.aws_ami.amazon_linux.id, 
+    
+  }
+}
 data "aws_availability_zones" "available" {
-  state = "available"
+  state            = "available"
 }
 
 module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "2.44.0"
+  source           = "terraform-aws-modules/vpc/aws"
+  version          = "2.44.0"
 
   cidr = var.vpc_cidr_block
 
-  azs             = data.aws_availability_zones.available.names
-  private_subnets = slice(var.private_subnet_cidr_blocks, 0, var.private_subnets_per_vpc)
-  public_subnets  = slice(var.public_subnet_cidr_blocks, 0, var.public_subnets_per_vpc)
+  azs              = data.aws_availability_zones.available.names
+  private_subnets  = slice(var.private_subnet_cidr_blocks, 0, var.private_subnets_per_vpc)
+  public_subnets   = slice(var.public_subnet_cidr_blocks, 0, var.public_subnets_per_vpc)
 
   enable_nat_gateway = true
   enable_vpn_gateway = false
 }
 
 module "app_security_group" {
-  source  = "terraform-aws-modules/security-group/aws//modules/web"
-  version = "3.12.0"
+  source             = "terraform-aws-modules/security-group/aws//modules/web"
+  version            = "3.12.0"
 
   name        = "web-server-sg-${var.project_name}-${var.environment}"
   description = "Security group for web-servers with HTTP ports open within VPC"
@@ -78,7 +85,15 @@ module "elb_http" {
     instance_protocol = "HTTP"
     lb_port           = "80"
     lb_protocol       = "HTTP"
-  }]
+  },
+  
+  {
+    instance_port     = 8080
+    instance_protocol = "TCP"
+    lb_port           = 8080
+    lb_protocol       = "TCP"
+  },
+  ]
 
   health_check = {
     target              = "HTTP:80/index.html"
@@ -88,6 +103,13 @@ module "elb_http" {
     timeout             = 5
   }
 }
+
+
+
+
+
+
+
 
 data "aws_ami" "amazon_linux" {
   most_recent = true
@@ -101,25 +123,40 @@ data "aws_ami" "amazon_linux" {
 
 
 
+data "aws_ebs_snapshot" "my-existing-snapshot" {
+  most_recent            = true
+  owners                 = ["self"]
+
+  filter {
+    name                 = "tag:Name"
+    values               = ["my-snapshot-latest"]
+  }
+}
+resource "aws_ami" "my-ami" {
+  # count                  = var.use-snapshot ? 1 : 0
+  name                   = "my-snapshot-ami"
+  virtualization_type    = "hvm"
+  root_device_name       = "/dev/sda1"
+
+  ebs_block_device {
+    snapshot_id          = data.aws_ebs_snapshot.my-existing-snapshot.id
+    device_name          = "/dev/sda1"
+  }
+}
+
+
+
 
 resource "aws_instance" "app" {
-count = var.instances_per_subnet * length(module.vpc.private_subnets)
+  count                  = var.instances_per_subnet * length(module.vpc.private_subnets)
+  ami                    = "${lookup(local.ami-mapping, var.use-snapshot, "No way this should happen")}"
+  
 
-  ami           = data.aws_ami.amazon_linux.id
-  instance_type = var.instance_type
-
+  instance_type          = var.instance_type
   subnet_id              = module.vpc.private_subnets[count.index % length(module.vpc.private_subnets)]
   vpc_security_group_ids = [module.app_security_group.this_security_group_id]
-
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo yum update -y
-    sudo yum install httpd -y
-    sudo systemctl enable httpd
-    sudo systemctl start httpd
-    echo "<html><body><div>Hello, world!.. from $(hostname -f) </div></body></html>" > /var/www/html/index.html
-    EOF
-
+  user_data              = data.template_file.my-ec2-script.rendered
+  
   tags = {
     Terraform   = "true"
     Project     = var.project_name
