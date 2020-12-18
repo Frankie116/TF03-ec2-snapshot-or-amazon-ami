@@ -97,7 +97,7 @@ variable "my-scriptfile" {
 }
 
 variable "use-snapshot" {
-  description = "If true, a pre-configured snapshot that is available in the required region will be used"
+  description = "'true' to use 'my-snapshot-latest' ami (should already exist) or 'false' to use a standard amazon linux ami."
   type        = bool
-  default     = false
+  # default     = false
 }

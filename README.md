@@ -1,3 +1,29 @@
-# Learn Terraform count and for_each
+## ----------------------------------------------------------------------------
+# version  3.0
+#  Project: TF-ec2-optional-snapshot-amazon-ami
+## Purpose: To create a terraform run that will build an ec2 instance using
+## either a pre-existing snapshot or a standard amazon linux ami.
+## User will be prompted for option at TF launch.
+   Author:  Frank Effrim-Botchey
+## ----------------------------------------------------------------------------
 
-Learn what Terraform count and for_each are and when to use them.
+## Resources:
+
+modules:
+vpc
+app_security_group
+elb_http
+lb_security_group
+
+data:
+aws_ebs_snapshot 
+aws_availability_zones
+template_file
+
+resources:
+aws_ami
+aws_instance
+random_string
+
+script:
+my-script.sh
