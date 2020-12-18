@@ -7,7 +7,6 @@
    Author:  Frank Effrim-Botchey
 ## ----------------------------------------------------------------------------
 
-## Resources:
 
 ## modules:
 vpc
