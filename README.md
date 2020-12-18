@@ -9,21 +9,31 @@
 
 ## Resources:
 
-modules:
+## modules:
 vpc
+
 app_security_group
+
 elb_http
+
 lb_security_group
 
-data:
+## data:
 aws_ebs_snapshot 
+
 aws_availability_zones
+
 template_file
 
-resources:
+
+## resources:
+
 aws_ami
+
 aws_instance
+
 random_string
 
 script:
+
 my-script.sh
