@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
 
-##  Project: TF-ec2-snapshot-or-amazon-ami
+##  Project: TF04-ec2-snapshot-or-amazon-ami
 
 Purpose: To create a terraform run that will build an ec2 instance using
 
