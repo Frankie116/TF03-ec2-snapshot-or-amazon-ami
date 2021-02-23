@@ -1,11 +1,16 @@
-## ----------------------------------------------------------------------------
-# version  3.0
-#  Project: TF-TF-ec2-snapshot-or-amazon-ami
-## Purpose: To create a terraform run that will build an ec2 instance using
-## either a pre-existing snapshot or a standard amazon linux ami.
-## User will be prompted for option at TF launch.
-   Author:  Frank Effrim-Botchey
-## ----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+##  Project: TF-ec2-snapshot-or-amazon-ami
+
+Purpose: To create a terraform run that will build an ec2 instance using
+
+either a pre-existing snapshot or a standard amazon linux ami.
+
+User will be prompted for option at TF launch.
+
+Author:  Frank Effrim-Botchey
+
+----------------------------------------------------------------------------
 
 
 ## modules:
